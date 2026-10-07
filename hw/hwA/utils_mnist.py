@@ -77,10 +77,28 @@ class MedicalMnist(data.Dataset):
     """
     def __init__(self, root, index):
         super(MedicalMnist, self).__init__()
-        # scan all the subfolders under root using "glob"
-        categories = sorted(glob.glob(root + '*'))
-        # get all the subfolder names
-        categories = [x.split('/')[-1] for x in categories]
+        # scan all the subfolders under root
+        categories = sorted(glob.glob(os.path.join(root, '*')))
+
+        # only keep directories
+        categories = [x for x in categories if os.path.isdir(x)]
+
+        # get folder names
+        categories = [
+            os.path.basename(os.path.normpath(x))
+            for x in categories
+        ]
+
+        print("categories:", categories)
+
+        # scan images under each category
+        imgs = dict()
+
+        for c in categories:
+            imgs[c] = sorted(
+                glob.glob(os.path.join(root, c, '*'))
+            )
+            print(c, len(imgs[c]))
         # scan all the image names under each subfolder
         imgs = dict()
         for c in categories:
@@ -135,7 +153,7 @@ def show_examples(images, labels):
 
 
 def get_medical_mnist(args):
-    root = 'mmnist/'
+    root = 'mmnist'
     print('data folder:  ' + root)
     train_dataset = MedicalMnist(root=root, index=range(7000))
     validation_dataset = MedicalMnist(root=root, index=range(7000, 10000))
@@ -152,7 +170,7 @@ def get_medical_mnist(args):
 
 
 if __name__ == '__main__':
-    root = 'mmnist/'
+    root = './mmnist/'
     train_dataset = MedicalMnist(root=root, index=range(7000))
     validation_dataset = MedicalMnist(root=root, index=range(7000, 10000))
 

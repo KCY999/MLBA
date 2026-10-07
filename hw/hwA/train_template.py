@@ -6,30 +6,195 @@ from utils_mnist import *
 import numpy as np
 
 
+
 class Trainer:
-    def __init__(self, args, train_loader, validation_loader, model, loss_function, optimizer):
-        """Store the arguments, data loaders, model, loss function, and optimizer on self."""
-        pass
+    def __init__(
+        self,
+        args,
+        train_loader,
+        validation_loader,
+        model,
+        loss_function,
+        optimizer
+    ):
+        """
+        Store arguments, data loaders, model,
+        loss function, optimizer, and device.
+        """
+
+        self.args = args
+        self.train_loader = train_loader
+        self.validation_loader = validation_loader
+
+        self.loss_function = loss_function
+        self.optimizer = optimizer
+
+        # Use GPU if available
+        self.device = torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu'
+        )
+
+        print('Using device:', self.device)
+
+        # Move model to CPU/GPU
+        self.model = model.to(self.device)
 
     def overall_loop(self):
-        """Run training for specified epochs, print train/val loss each epoch."""
-        pass
+        """
+        Run training for specified epochs,
+        print train/validation loss each epoch.
+        """
+
+        for epoch in range(self.args['num_epochs']):
+
+            train_losses = self.training_loop(
+                self.train_loader
+            )
+
+            validation_losses = self.validation_loop(
+                self.validation_loader
+            )
+
+            train_loss = np.mean(train_losses)
+            validation_loss = np.mean(validation_losses)
+
+            print(
+                'Epoch [{}/{}], '
+                'Train Loss: {:.4f}, '
+                'Validation Loss: {:.4f}'.format(
+                    epoch + 1,
+                    self.args['num_epochs'],
+                    train_loss,
+                    validation_loss
+                )
+            )
 
     def training_loop(self, train_loader):
-        """Iterate through train batches, compute losses. Returns list of losses."""
-        pass
+        """
+        Iterate through training batches
+        and return list of batch losses.
+        """
+
+        # Enable training mode
+        self.model.train()
+
+        losses = []
+
+        for train_batch in train_loader:
+
+            loss = self.training_step(train_batch)
+
+            losses.append(loss)
+
+        return losses
 
     def validation_loop(self, validation_loader):
-        """Iterate through validation batches, compute losses. Returns list of losses."""
-        pass
+        """
+        Iterate through validation batches
+        and return list of batch losses.
+        """
+
+        # Disable dropout etc.
+        self.model.eval()
+
+        losses = []
+
+        # Validation does not need gradient
+        with torch.no_grad():
+
+            for validation_batch in validation_loader:
+
+                loss = self.validation_step(
+                    validation_batch
+                )
+
+                losses.append(loss)
+
+        return losses
 
     def training_step(self, train_batch):
-        """Forward pass, compute loss, backprop, update weights. Returns loss."""
-        pass
+        """
+        Forward pass
+        -> compute loss
+        -> backpropagation
+        -> update weights
+        """
+
+        images, labels = train_batch
+
+        # Move data to device
+        images = images.to(
+            self.device,
+            dtype=torch.float32
+        )
+
+        labels = labels.to(
+            self.device,
+            dtype=torch.long
+        )
+
+        # Logistic regression requires flattened input
+        if self.args['model'] == 'logistic_regression':
+            images = images.reshape(
+                -1,
+                self.args['img_size']
+            )
+
+        # Clear previous gradients
+        self.optimizer.zero_grad()
+
+        # Forward pass
+        outputs = self.model(images)
+
+        # Compute loss
+        loss = self.loss_function(
+            outputs,
+            labels
+        )
+
+        # Backpropagation
+        loss.backward()
+
+        # Update model weights
+        self.optimizer.step()
+
+        # Convert tensor loss to Python number
+        return loss.item()
 
     def validation_step(self, validation_batch):
-        """Forward pass, compute loss (no backprop). Returns loss."""
-        pass
+        """
+        Forward pass and compute validation loss.
+        No backpropagation.
+        """
+
+        images, labels = validation_batch
+
+        images = images.to(
+            self.device,
+            dtype=torch.float32
+        )
+
+        labels = labels.to(
+            self.device,
+            dtype=torch.long
+        )
+
+        if self.args['model'] == 'logistic_regression':
+            images = images.reshape(
+                -1,
+                self.args['img_size']
+            )
+
+        # Forward pass
+        outputs = self.model(images)
+
+        # Compute validation loss
+        loss = self.loss_function(
+            outputs,
+            labels
+        )
+
+        return loss.item()
 
 
 # arguments
@@ -85,6 +250,17 @@ trainer.overall_loop()
 correct = 0
 total = 0
 for images, labels in validation_loader:
+    
+    images = images.to(
+        trainer.device,
+        dtype=torch.float32
+    )
+
+    labels = labels.to(
+        trainer.device,
+        dtype=torch.long
+    )
+    
     images = images.reshape(-1, args['img_size'])
     outputs = model(images)
 
