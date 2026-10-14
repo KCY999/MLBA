@@ -1,8 +1,15 @@
 # ML 2026 Supplmentary Materials
 
-## Demo 0: Linear & Logistic Regression
+## Demo A: Your Model vs. the LLM
 
-[open app](https://ml2025-tktlc35nrkffsrykq653eb.streamlit.app/)
+[open app](https://ml2026-dnum5jto2i4ipqdxyuz3tb.streamlit.app/)
+
+### Take home exercise
+
+| Name | Link | Due date |
+|------|------|----------|
+| Anchor paper worksheet | [open form](https://forms.gle/pisyTPp1XW55vkbYA) | 10/18 |
+| Classifier on Medical MNIST | [open notebook](hw/hwA/demo_template.ipynb) | 10/25 |
 
 
 ## Installing Python packages
