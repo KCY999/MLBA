@@ -10,6 +10,7 @@
 |------|------|----------|
 | Anchor paper worksheet | [open form](https://forms.gle/pisyTPp1XW55vkbYA) | 10/18 |
 | Classifier on Medical MNIST | [open notebook](hw/hwA/demo_template.ipynb) | 10/25 |
+| Argue a research gap | [open app](https://bfvuhmd8lbdpwnwfzda985.streamlit.app/) | 11/8 |
 
 
 ## Installing Python packages
